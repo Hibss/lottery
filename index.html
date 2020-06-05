@@ -117,9 +117,14 @@
         .tools .pure-button {
             display: inline-block;
             margin: 5px;
-            padding: 10px 0;
+            padding: 10px 5px;
             text-align: center;
-            width:50px;
+            width:70px;
+        }
+        .button-reset {
+            position: absolute;
+            bottom: 20px;
+            left: 20px;
         }
         .mask {
             -webkit-filter:blur(5px);
@@ -134,25 +139,30 @@
 <body>
 <div id="main" class="wall"></div>
 <div id="result" class="result"></div>
-<div id="tools" class="tools">
-    <button
-        v-on="click: onClick($value)"
-        class="pure-button"
-        v-class="button-error: selected == $value"
-        v-repeat="btns">{{$value}}</button>
-    <button
-        class="pure-button"
-        v-on="click: toggle"
-        v-class="
+<div id="tools">
+    <div class="tools">
+        <button
+                v-on="click: onClick($value)"
+                class="pure-button"
+                v-class="button-error: selected == $value"
+                v-repeat="btns">{{$value}}</button>
+        <button
+                class="pure-button"
+                v-on="click: toggle"
+                v-class="
                 button-secondary: !running,
                 button-success: running
             ">{{running?'停!':'开始'}}</button>
-    <button class="pure-button button-warning" v-on="click: reset">重置</button>
+        <!--<button class="pure-button button-warning" v-on="click: resethidden" v-show="!resetHidden">隐藏重置</button>-->
+    </div>
+    <button class="pure-button button-warning button-reset" v-on="click: reset">重置</button>
 </div>
+
 <script type="text/javascript" src="js/zepto.js"></script>
 <script type="text/javascript" src="js/vue.js"></script>
 <script type="text/javascript" src="js/tagcanvas.js"></script>
 <script type="text/javascript" src="js/member.js"></script>
+<script type="text/javascript" src="js/FileSaver.min.js"></script>
 <script type="text/javascript">
     (function(){
         var choosed = JSON.parse(localStorage.getItem('choosed')) || {};
@@ -165,6 +175,7 @@
         };
         var createHTML = function(){
             var html = [ '<ul>' ];
+            console.log(member.length)
             member.forEach(function(item, index){
                 item.index = index;
                 var key = getKey(item);
@@ -207,19 +218,17 @@
         new Vue({
             el: '#tools',
             data: {
-                selected: 30,
+                selected: 0,
                 running: false,
-                btns: [
-                    30, 10, 5, 2, 1
-                ]
+                btns: [1, 2, 3, 4, 5, 6]
             },
             ready: function(){
                 canvas.innerHTML = createHTML();
                 TagCanvas.Start('myCanvas', '', {
-                    textColour: null,
+                    textColour: '#e4d19f',
                     initial: speed(),
                     dragControl: 1,
-                    textHeight: 14
+                    textHeight: 40
                 });
             },
             methods: {
@@ -230,6 +239,7 @@
                     }
                 },
                 onClick: function(num){
+                    console.log('click num', num)
                     $('#result').css('display', 'none');
                     $('#main').removeClass('mask');
                     this.selected = num;
@@ -245,6 +255,9 @@
                             $('#main').addClass('mask');
                         }, 300);
                         console.log(ret);
+
+                        var blob = new Blob(ret, {type: "text/plain;charset=utf-8"});
+                        saveAs(blob, "prize.txt");
                     } else {
                         $('#result').css('display', 'none');
                         $('#main').removeClass('mask');
